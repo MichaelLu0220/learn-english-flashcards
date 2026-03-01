@@ -1,54 +1,75 @@
-# English Flashcard (Flet)
+# English Flashcard Player
 
-一個以 Flet 製作的輕量英文單字卡播放器，從 Excel 讀取單字，支援自動輪播、隨機/順序模式、鍵盤快捷鍵與設定儲存，方便在學習或背誦時隨時播放。
+Minimal English vocabulary player built with **Flet**.  
+Reads words from Excel and provides distraction-free playback for focused memorization.
 
-## 功能特色
-- **Excel 智慧欄位辨識**：可讀取含標題或無標題的表格，自動對應單字/中文/例句欄位。
-- **自動/手動播放**：可設定顯示秒數，自動輪播單字；點擊卡片或按左右鍵手動切換。
-- **播放模式切換**：在順序與隨機模式間切換；隨機模式不支援回上一個並會提示。
-- **控制列自動收合**：滑鼠移入展開、離開後延遲收合，保持視窗簡潔；可調整速度並即時生效。
-- **狀態提示與設定保存**：播放/暫停、模式切換、速度變更、重新載入等操作會顯示訊息，並將設定寫回 `config.json`。
+---
 
-## 環境需求
-- Python 3.8+（建議使用虛擬環境）
-- 依賴套件：見下方安裝指令或 `requirements.txt`
+## Features
 
-## 安裝與執行
-1. 安裝依賴：
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. 準備 Excel 檔（預設 `list.xlsx`，可改 `config.json` 中的 `excel_file`）。
-3. 執行應用：
-   ```bash
-   python main.py
-   ```
+- Smart Excel column detection (Word / Meaning / Example)
+- Auto & manual playback
+- Sequential / Random mode
+- Keyboard shortcuts
+- Persistent settings (`config.json`)
+- Clean auto-hide control panel
 
-## Excel 檔案格式
-- 支援含標題或無標題的工作表。
-- 標題列會依關鍵字匹配：`word/單字/英文` 對應單字欄，`meaning/中文/解釋` 對應中文欄，`example/例句` 對應例句欄。
-- 若無標題，預設第一欄為單字、第二欄為中文、第三欄為例句（可缺欄）。
-- 預設讀取第一個工作表；如需指定，請在 `config.json` 設定 `sheet_name`。
+---
 
-## 操作與快捷鍵
-- 點擊卡片：播放下一個單字
-- 空白鍵：播放/暫停
-- 左箭頭：上一個（隨機模式不可用）
-- 右箭頭：下一個
-- `M`：切換隨機/順序模式
-- `R`：重新讀取 Excel
-- 滑鼠移入視窗底部：展開控制列；移出後自動收合
+## Quick Start
 
-## 可調設定（`config.json`）
-- `display_time`：每個單字顯示時間（毫秒），速度輸入會同步更新
-- `is_random_mode`：預設是否隨機播放
-- `window_width` / `window_height`：視窗大小，控制列展開時高度會自動加上控制面板
-- `always_on_top`：是否置頂
-- `excel_file` / `sheet_name`：資料來源檔案與工作表
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
 
-## 常見問題
-- **找不到檔案**：確認 `excel_file` 路徑或將檔案放在專案根目錄。
-- **欄位未對應**：確保標題包含可辨識的關鍵字，或依預設順序排列欄位。
-- **控制列不見**：滑鼠移入視窗下方即可展開，鍵盤仍可操作。
+---
 
-如需協助或建議，歡迎透過 Gmail: michaellu0220@gmail.com 聯繫。
+## Excel Format
+
+Supports:
+
+- With header (auto keyword matching)
+- Without header (Col1=Word, Col2=Meaning, Col3=Example)
+
+Default file: `list.xlsx`  
+Configurable via `config.json`
+
+---
+
+## Shortcuts
+
+| Key | Action |
+|------|--------|
+| Space | Play / Pause |
+| -> | Next |
+| <- | Previous (Sequential only) |
+| M | Toggle Random |
+| R | Reload Excel |
+
+---
+
+## Configuration
+
+Editable in `config.json`:
+
+- `display_time`
+- `is_random_mode`
+- `window_width` / `window_height`
+- `always_on_top`
+- `excel_file`
+- `sheet_name`
+
+---
+
+## Philosophy
+
+Designed for focus.  
+No noise. No clutter. Just repetition.
+
+---
+
+Michael Lu  
+michaellu0220@gmail.com

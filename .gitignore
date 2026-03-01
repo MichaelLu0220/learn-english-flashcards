@@ -1,0 +1,27 @@
+/english.spec
+/tempCodeRunnerFile.py
+README-old.md
+
+# Virtual Environment
+test/
+venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+config.json
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,46 @@
+列出磁碟區 Data 的資料夾 PATH
+磁碟區序號為 58D9-7F45
+D:.
+|   .gitignore
+|   config.json
+|   main.py
+|   output.txt
+|   README.md
+|   requirements.txt
+|   
++---config
+|   |   settings.py
+|   |   
+|   \---__pycache__
+|           settings.cpython-311.pyc
+|           
++---core
+|   |   excel.py
+|   |   models.py
+|   |   state.py
+|   |   timer.py
+|   |   __init__.py
+|   |   
+|   \---__pycache__
+|           excel.cpython-311.pyc
+|           excel_reader.cpython-311.pyc
+|           models.cpython-311.pyc
+|           state.cpython-311.pyc
+|           timer.cpython-311.pyc
+|           __init__.cpython-311.pyc
+|           
++---data
+|       list.xlsx
+|       
+\---ui
+    |   app.py
+    |   controls.py
+    |   flashcard.py
+    |   __init__.py
+    |   
+    \---__pycache__
+            app.cpython-311.pyc
+            controls.cpython-311.pyc
+            flashcard.cpython-311.pyc
+            __init__.cpython-311.pyc
+            

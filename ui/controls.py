@@ -48,12 +48,12 @@ class Controls(ft.Container):
         
         # 播放/暫停按鈕
         self.play_btn = ft.IconButton(
-            icon=ft.Icons.PLAY_ARROW_ROUNDED if self.is_paused else ft.Icons.PAUSE_ROUNDED,
-            icon_color=ft.Colors.WHITE,
+            icon=ft.icons.PLAY_ARROW_ROUNDED if self.is_paused else ft.icons.PAUSE_ROUNDED,
+            icon_color=ft.colors.WHITE,
             icon_size=icon_size,
             width=btn_size,
             height=btn_size,
-            bgcolor=ft.Colors.BLUE_700,
+            bgcolor=ft.colors.BLUE_700,
             on_click=self._handle_play_pause,
             tooltip="播放/暫停 (Space)",
             style=ft.ButtonStyle(
@@ -64,12 +64,12 @@ class Controls(ft.Container):
         
         # 上一個按鈕
         self.prev_btn = ft.IconButton(
-            icon=ft.Icons.SKIP_PREVIOUS_ROUNDED,
-            icon_color=ft.Colors.WHITE,
+            icon=ft.icons.SKIP_PREVIOUS_ROUNDED,
+            icon_color=ft.colors.WHITE,
             icon_size=icon_size,
             width=btn_size,
             height=btn_size,
-            bgcolor=ft.Colors.BLUE_700,
+            bgcolor=ft.colors.BLUE_700,
             on_click=self._handle_prev,
             tooltip="上一個 (←)",
             style=ft.ButtonStyle(
@@ -80,12 +80,12 @@ class Controls(ft.Container):
         
         # 下一個按鈕
         self.next_btn = ft.IconButton(
-            icon=ft.Icons.SKIP_NEXT_ROUNDED,
-            icon_color=ft.Colors.WHITE,
+            icon=ft.icons.SKIP_NEXT_ROUNDED,
+            icon_color=ft.colors.WHITE,
             icon_size=icon_size,
             width=btn_size,
             height=btn_size,
-            bgcolor=ft.Colors.BLUE_700,
+            bgcolor=ft.colors.BLUE_700,
             on_click=self._handle_next,
             tooltip="下一個 (→)",
             style=ft.ButtonStyle(
@@ -97,8 +97,8 @@ class Controls(ft.Container):
         # 模式切換按鈕
         self.mode_btn = ft.ElevatedButton(
             text="隨機" if self.is_random else "順序",
-            color=ft.Colors.WHITE,
-            bgcolor=ft.Colors.RED_700,
+            color=ft.colors.WHITE,
+            bgcolor=ft.colors.RED_700,
             on_click=self._handle_mode_toggle,
             tooltip="切換模式 (M)",
             height=btn_size,
@@ -111,12 +111,12 @@ class Controls(ft.Container):
         
         # 重新載入按鈕
         self.reload_btn = ft.IconButton(
-            icon=ft.Icons.REFRESH_ROUNDED,
-            icon_color=ft.Colors.WHITE,
+            icon=ft.icons.REFRESH_ROUNDED,
+            icon_color=ft.colors.WHITE,
             icon_size=icon_size,
             width=btn_size,
             height=btn_size,
-            bgcolor=ft.Colors.GREEN_700,
+            bgcolor=ft.colors.GREEN_700,
             on_click=self._handle_reload,
             tooltip="重新載入 (R)",
             style=ft.ButtonStyle(
@@ -133,9 +133,9 @@ class Controls(ft.Container):
             text_size=11,
             content_padding=ft.padding.symmetric(horizontal=4, vertical=0),
             text_align=ft.TextAlign.CENTER,
-            bgcolor=ft.Colors.with_opacity(0.3, ft.Colors.WHITE),
-            border_color=ft.Colors.TRANSPARENT,
-            color=ft.Colors.WHITE,
+            bgcolor=ft.colors.with_opacity(0.3, ft.colors.WHITE),
+            border_color=ft.colors.TRANSPARENT,
+            color=ft.colors.WHITE,
             on_submit=self._handle_speed_change,
             on_focus=self._handle_speed_focus,
             on_blur=self._handle_speed_blur,
@@ -145,7 +145,7 @@ class Controls(ft.Container):
         self.progress_label = ft.Text(
             value=self.progress_text,
             size=11,
-            color=ft.Colors.WHITE70,
+            color=ft.colors.WHITE70,
         )
         
         # 左側按鈕群
@@ -163,9 +163,9 @@ class Controls(ft.Container):
         # 右側速度 + 進度
         right_controls = ft.Row(
             controls=[
-                ft.Text("速度", size=10, color=ft.Colors.WHITE54),
+                ft.Text("速度", size=10, color=ft.colors.WHITE54),
                 self.speed_field,
-                ft.Text("秒", size=10, color=ft.Colors.WHITE54),
+                ft.Text("秒", size=10, color=ft.colors.WHITE54),
                 ft.Container(width=8),
                 self.progress_label,
             ],
@@ -185,7 +185,7 @@ class Controls(ft.Container):
         )
         
         # 容器設定
-        self.bgcolor = ft.Colors.with_opacity(0.15, ft.Colors.WHITE)
+        self.bgcolor = ft.colors.with_opacity(0.15, ft.colors.WHITE)
         self.border_radius = 8
         self.padding = ft.padding.symmetric(horizontal=10, vertical=6)
     
@@ -241,7 +241,7 @@ class Controls(ft.Container):
     def update_play_state(self, is_paused: bool):
         """更新播放狀態"""
         self.is_paused = is_paused
-        self.play_btn.icon = ft.Icons.PLAY_ARROW_ROUNDED if is_paused else ft.Icons.PAUSE_ROUNDED
+        self.play_btn.icon = ft.icons.PLAY_ARROW_ROUNDED if is_paused else ft.icons.PAUSE_ROUNDED
         
         if self.page:
             self.play_btn.update()

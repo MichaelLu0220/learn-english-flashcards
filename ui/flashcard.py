@@ -26,14 +26,14 @@ class Flashcard(ft.Container):
             value="",
             size=22,
             weight=ft.FontWeight.BOLD,
-            color=ft.Colors.WHITE,
+            color=ft.colors.WHITE,
         )
         
         # 意思標籤
         self.meaning_text = ft.Text(
             value="",
             size=14,
-            color=ft.Colors.WHITE70,
+            color=ft.colors.WHITE70,
         )
         
         # 第一行：單字 + 意思
@@ -53,7 +53,7 @@ class Flashcard(ft.Container):
             value="",
             size=12,
             italic=True,
-            color=ft.Colors.WHITE54,
+            color=ft.colors.WHITE54,
             text_align=ft.TextAlign.CENTER,
         )
         
@@ -70,7 +70,7 @@ class Flashcard(ft.Container):
         
         # 設定容器屬性
         self.content = self.card_content
-        self.bgcolor = ft.Colors.with_opacity(0.15, ft.Colors.WHITE)
+        self.bgcolor = ft.colors.with_opacity(0.15, ft.colors.WHITE)
         self.border_radius = 10
         self.padding = ft.padding.symmetric(horizontal=16, vertical=12)
         self.alignment = ft.alignment.center  # 這會讓容器填滿父層寬度

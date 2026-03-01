@@ -95,7 +95,7 @@ class EnglishFlashcardApp:
         self.message_text = ft.Text(
             value="",
             size=11,
-            color=ft.Colors.WHITE70,
+            color=ft.colors.WHITE70,
             text_align=ft.TextAlign.CENTER,
         )
         
