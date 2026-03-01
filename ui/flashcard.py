@@ -27,6 +27,7 @@ class Flashcard(ft.Container):
             size=22,
             weight=ft.FontWeight.BOLD,
             color=ft.colors.WHITE,
+            text_align=ft.TextAlign.CENTER,
         )
         
         # 意思標籤
@@ -34,18 +35,7 @@ class Flashcard(ft.Container):
             value="",
             size=14,
             color=ft.colors.WHITE70,
-        )
-        
-        # 第一行：單字 + 意思
-        self.word_row = ft.Row(
-            controls=[
-                self.word_text,
-                ft.Container(width=10),
-                self.meaning_text,
-            ],
-            alignment=ft.MainAxisAlignment.CENTER,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            wrap=True,
+            text_align=ft.TextAlign.CENTER,
         )
         
         # 例句標籤
@@ -57,15 +47,16 @@ class Flashcard(ft.Container):
             text_align=ft.TextAlign.CENTER,
         )
         
-        # 卡片內容
+        # 卡片內容：英文在上、中文在下、例句最下
         self.card_content = ft.Column(
             controls=[
-                self.word_row,
+                self.word_text,
+                self.meaning_text,
                 self.example_text,
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=4,
+            spacing=2,
         )
         
         # 設定容器屬性
@@ -73,7 +64,7 @@ class Flashcard(ft.Container):
         self.bgcolor = ft.colors.with_opacity(0.15, ft.colors.WHITE)
         self.border_radius = 10
         self.padding = ft.padding.symmetric(horizontal=16, vertical=12)
-        self.alignment = ft.alignment.center  # 這會讓容器填滿父層寬度
+        self.alignment = ft.alignment.center
         self.on_click = self._handle_click
         
         # 初始顯示

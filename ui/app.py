@@ -54,7 +54,7 @@ class EnglishFlashcardApp:
         """設定視窗"""
         self.page.title = "English Flashcard"
         self.page.window.width = self.config.get("window_width", 500)
-        self.page.window.height = self.config.get("window_height", 100)
+        self.page.window.height = self.config.get("window_height", 140)
         self.page.window.min_width = 400
         self.page.window.min_height = 80
         self.page.window.always_on_top = self.config.get("always_on_top", True)
@@ -116,14 +116,12 @@ class EnglishFlashcardApp:
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
         )
         
-        # 動畫容器
+        # 控制面板容器（無動畫，避免閃爍）
         self.controls_container = ft.Container(
             content=controls_content,
             height=0,
             opacity=0,
             clip_behavior=ft.ClipBehavior.HARD_EDGE,
-            animate=ft.Animation(250, ft.AnimationCurve.EASE_OUT),
-            animate_opacity=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
         )
         
         # 主容器
@@ -260,87 +258,49 @@ class EnglishFlashcardApp:
     def _on_hover(self, e: ft.ControlEvent):
         """滑鼠 hover 事件"""
         if e.data == "true":
-            # 滑鼠進入 - 取消隱藏計時器並顯示控制面板
             self.state.is_mouse_in = True
             self.timers.cancel_hide_timer()
             self._show_controls()
         else:
-            # 滑鼠離開 - 延遲 1 秒後隱藏
             self.state.is_mouse_in = False
             
-            # 正在編輯時不隱藏
             if self.state.is_editing:
                 return
             
-            # 啟動延遲隱藏計時器
             self.timers.start_hide_timer(1.0, self._do_hide_controls)
     
     def _show_controls(self):
-        """展開控制面板（帶動畫）"""
+        """瞬間展開控制面板"""
         if self.controls_container.height > 0:
             return
         
-        base_height = self.config.get("window_height", 100)
+        base_height = self.config.get("window_height", 140)
         target_height = base_height + self.CONTROLS_HEIGHT + 20
         
-        # 同時啟動：控制面板動畫 + 視窗平滑展開
+        # 所有狀態一次性設定，只呼叫一次 page.update()
         self.controls_container.height = self.CONTROLS_HEIGHT + 20
         self.controls_container.opacity = 1
-        self.controls_container.update()
-        
-        # 視窗平滑展開
-        self._animate_window_height(base_height, target_height, 250)
+        self.page.window.height = target_height
+        self.page.update()
     
     def _hide_controls(self):
-        """收起控制面板（帶動畫）"""
+        """瞬間收起控制面板"""
         if self.controls_container.height == 0:
             return
         
-        # 取消任何進行中的隱藏計時器
         self.timers.cancel_hide_timer()
         
-        # 隱藏訊息
-        self._hide_message()
+        base_height = self.config.get("window_height", 140)
         
-        base_height = self.config.get("window_height", 100)
-        current_height = self.page.window.height
-        
-        # 同時啟動：控制面板動畫 + 視窗平滑收起
+        # 所有狀態一次性設定（含訊息隱藏），只呼叫一次 page.update()
         self.controls_container.height = 0
         self.controls_container.opacity = 0
-        self.controls_container.update()
-        
-        # 視窗平滑收起
-        self._animate_window_height(current_height, base_height, 250)
-    
-    def _animate_window_height(self, from_height: float, to_height: float, duration_ms: int):
-        """平滑調整視窗高度"""
-        def animate():
-            import time
-            
-            steps = 15  # 分 15 步完成
-            interval = duration_ms / 1000 / steps  # 每步間隔
-            delta = (to_height - from_height) / steps
-            
-            current = from_height
-            for i in range(steps):
-                current += delta
-                if self.page:
-                    self.page.window.height = current
-                    self.page.update()
-                time.sleep(interval)
-            
-            # 確保最終高度精確
-            if self.page:
-                self.page.window.height = to_height
-                self.page.update()
-        
-        t = threading.Thread(target=animate, daemon=True)
-        t.start()
+        self.message_container.opacity = 0
+        self.page.window.height = base_height
+        self.page.update()
     
     def _do_hide_controls(self):
         """延遲隱藏的回調（由計時器觸發）"""
-        # 再次檢查條件，避免計時器觸發時狀態已改變
         if self.state.is_mouse_in or self.state.is_editing:
             return
         
@@ -350,20 +310,18 @@ class EnglishFlashcardApp:
     def _on_speed_focus(self, e):
         """速度輸入框獲得焦點"""
         self.state.is_editing = True
-        # 取消隱藏計時器，避免編輯時面板消失
         self.timers.cancel_hide_timer()
     
     def _on_speed_blur(self, e):
         """速度輸入框失去焦點"""
         self.state.is_editing = False
-        # 如果滑鼠已經離開，啟動延遲隱藏
         if not self.state.is_mouse_in:
             self.timers.start_hide_timer(1.0, self._do_hide_controls)
 
     def _ensure_base_height(self):
         """確保視窗為基礎高度"""
         if self.controls_container and self.controls_container.height == 0:
-            base_height = self.config.get("window_height", 100)
+            base_height = self.config.get("window_height", 140)
             self.page.window.height = base_height
             self.page.update()
     
@@ -388,7 +346,6 @@ class EnglishFlashcardApp:
         """視窗事件"""
         if e.data == "close":
             self.timers.cancel_all()
-            # 取消訊息計時器
             if self._message_timer:
                 self._message_timer.cancel()
             self.config.save()
@@ -397,7 +354,6 @@ class EnglishFlashcardApp:
     
     def _show_message(self, message: str):
         """顯示訊息（在控制面板內）"""
-        # 取消之前的隱藏計時器
         if self._message_timer:
             self._message_timer.cancel()
         
@@ -407,7 +363,6 @@ class EnglishFlashcardApp:
         if self.page:
             self.message_container.update()
         
-        # 2 秒後自動淡出訊息
         self._message_timer = threading.Timer(2.0, self._fade_out_message)
         self._message_timer.daemon = True
         self._message_timer.start()

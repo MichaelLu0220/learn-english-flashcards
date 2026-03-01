@@ -14,7 +14,7 @@ class ConfigManager:
         
         # 視窗設定
         "window_width": 380,
-        "window_height": 118,  # 基礎高度（不含控制面板）
+        "window_height": 140,  # 基礎高度（不含控制面板）
         "always_on_top": True,
         
         # 檔案設定
