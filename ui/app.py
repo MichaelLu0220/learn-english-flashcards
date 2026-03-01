@@ -9,6 +9,7 @@ from core.state import AppState
 from core.timer import TimerManager
 from ui.flashcard import Flashcard
 from ui.controls import Controls
+from ui.example_dialog import ExampleDialog
 
 
 class EnglishFlashcardApp:
@@ -31,9 +32,13 @@ class EnglishFlashcardApp:
         self.controls_container: Optional[ft.Container] = None
         self.message_text: Optional[ft.Text] = None
         self.message_container: Optional[ft.Container] = None
+        self.example_dialog: Optional[ExampleDialog] = None
         
         # 訊息計時器
         self._message_timer: Optional[threading.Timer] = None
+        
+        # Dialog 開啟旗標（防止控制面板在 Dialog 顯示時被收起）
+        self._is_dialog_open: bool = False
         
         # 從 config 初始化狀態
         self.state.is_random_mode = self.config.get("is_random_mode", False)
@@ -72,10 +77,36 @@ class EnglishFlashcardApp:
     
     def _build_ui(self):
         """建立 UI"""
-        # 單字卡片
-        self.flashcard = Flashcard(on_click=self._on_card_click)
+        # 單字卡片（短按換字、長按開例句）
+        self.flashcard = Flashcard(
+            on_short_click=self._on_card_short_click,
+            on_long_press=self._on_card_long_press,
+        )
         self.flashcard.set_loading()
-        
+
+        # 訊息 overlay（疊在卡片右上角）
+        self.message_text = ft.Text(
+            value="",
+            size=11,
+            color=ft.colors.WHITE,
+        )
+        self.message_container = ft.Container(
+            content=self.message_text,
+            bgcolor=ft.colors.with_opacity(0.55, ft.colors.BLACK),
+            border_radius=6,
+            padding=ft.padding.symmetric(horizontal=8, vertical=4),
+            right=8,
+            top=8,
+            opacity=0,
+            animate_opacity=ft.Animation(250, ft.AnimationCurve.EASE_OUT),
+        )
+
+        # 卡片 + overlay 疊加
+        self.card_stack = ft.Stack(
+            controls=[self.flashcard, self.message_container],
+            expand=True,
+        )
+
         # 控制面板
         self.controls = Controls(
             is_paused=self.state.is_paused,
@@ -91,34 +122,9 @@ class EnglishFlashcardApp:
             on_speed_blur=self._on_speed_blur,
         )
         
-        # 訊息文字（整合在控制面板上方）
-        self.message_text = ft.Text(
-            value="",
-            size=11,
-            color=ft.colors.WHITE70,
-            text_align=ft.TextAlign.CENTER,
-        )
-        
-        self.message_container = ft.Container(
-            content=self.message_text,
-            alignment=ft.alignment.center,
-            opacity=0,
-            animate_opacity=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
-        )
-        
-        # 控制面板容器（含訊息 + 按鈕）
-        controls_content = ft.Column(
-            controls=[
-                self.message_container,
-                self.controls,
-            ],
-            spacing=4,
-            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
-        )
-        
         # 控制面板容器（無動畫，避免閃爍）
         self.controls_container = ft.Container(
-            content=controls_content,
+            content=self.controls,
             height=0,
             opacity=0,
             clip_behavior=ft.ClipBehavior.HARD_EDGE,
@@ -127,7 +133,7 @@ class EnglishFlashcardApp:
         # 主容器
         main_container = ft.Container(
             content=ft.Column(
-                controls=[self.flashcard, self.controls_container],
+                controls=[self.card_stack, self.controls_container],
                 spacing=8,
                 horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
             ),
@@ -138,6 +144,12 @@ class EnglishFlashcardApp:
         )
         
         self.page.add(main_container)
+
+        # 例句彈出視窗（page.add 之後才初始化）
+        self.example_dialog = ExampleDialog(
+            page=self.page,
+            on_close=self._on_example_closed,
+        )
     
     # ==================== 資料載入 ====================
     
@@ -249,10 +261,55 @@ class EnglishFlashcardApp:
         if not self.state.is_paused:
             self._schedule_next()
     
-    def _on_card_click(self, e):
-        """點擊卡片"""
+    # ==================== 卡片點擊 ====================
+
+    def _on_card_short_click(self, e):
+        """短按卡片 → 換下一個單字"""
         self._next_word()
-    
+
+    def _on_card_long_press(self, e):
+        """長按計時到達 → 暫停播放並顯示例句視窗"""
+        entry = self.state.get_current_entry()
+        if not entry:
+            return
+
+        # 標記 dialog 已開啟，防止控制面板被收起
+        self._is_dialog_open = True
+
+        # 暫停播放
+        if not self.state.is_paused:
+            self.state.is_paused = True
+            self.timers.cancel_auto_timer()
+            self.controls.update_play_state(True)
+
+        # 記錄目前視窗高度，並放大以容納 Dialog 內容
+        self._pre_dialog_height = self.page.window.height
+        dialog_height = self.config.get("window_height", 140) + self.CONTROLS_HEIGHT + 8 + 200
+
+        # 確保控制面板展開，視窗一次性放大
+        self.controls_container.height = self.CONTROLS_HEIGHT + 8
+        self.controls_container.opacity = 1
+        self.page.window.height = dialog_height
+        self.page.update()
+
+        # 顯示例句彈出視窗
+        self.example_dialog.show(entry)
+
+    def _on_example_closed(self):
+        """例句視窗關閉 → 還原視窗高度並恢復播放"""
+        self._is_dialog_open = False
+
+        # 還原視窗高度
+        restore_height = getattr(self, "_pre_dialog_height", None)
+        if restore_height:
+            self.page.window.height = restore_height
+            self.page.update()
+
+        self.state.is_paused = False
+        self.controls.update_play_state(False)
+        self._schedule_next()
+        self._show_message("繼續播放")
+
     # ==================== 控制面板顯示/隱藏 ====================
     
     def _on_hover(self, e: ft.ControlEvent):
@@ -275,10 +332,9 @@ class EnglishFlashcardApp:
             return
         
         base_height = self.config.get("window_height", 140)
-        target_height = base_height + self.CONTROLS_HEIGHT + 20
+        target_height = base_height + self.CONTROLS_HEIGHT + 8
         
-        # 所有狀態一次性設定，只呼叫一次 page.update()
-        self.controls_container.height = self.CONTROLS_HEIGHT + 20
+        self.controls_container.height = self.CONTROLS_HEIGHT + 8
         self.controls_container.opacity = 1
         self.page.window.height = target_height
         self.page.update()
@@ -292,7 +348,6 @@ class EnglishFlashcardApp:
         
         base_height = self.config.get("window_height", 140)
         
-        # 所有狀態一次性設定（含訊息隱藏），只呼叫一次 page.update()
         self.controls_container.height = 0
         self.controls_container.opacity = 0
         self.message_container.opacity = 0
@@ -301,7 +356,8 @@ class EnglishFlashcardApp:
     
     def _do_hide_controls(self):
         """延遲隱藏的回調（由計時器觸發）"""
-        if self.state.is_mouse_in or self.state.is_editing:
+        # Dialog 開啟中、滑鼠在內、或正在編輯時都不收起
+        if self.state.is_mouse_in or self.state.is_editing or self._is_dialog_open:
             return
         
         if self.page:
@@ -353,13 +409,12 @@ class EnglishFlashcardApp:
     # ==================== 訊息提示 ====================
     
     def _show_message(self, message: str):
-        """顯示訊息（在控制面板內）"""
+        """在卡片右上角以 overlay 顯示訊息，2 秒後自動淡出"""
         if self._message_timer:
             self._message_timer.cancel()
         
         self.message_text.value = message
         self.message_container.opacity = 1
-        
         if self.page:
             self.message_container.update()
         
